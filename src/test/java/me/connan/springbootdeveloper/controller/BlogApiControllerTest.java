@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import me.connan.springbootdeveloper.domain.Article;
 import me.connan.springbootdeveloper.dto.AddArticleRequest;
+import me.connan.springbootdeveloper.dto.UpdateArticleRequest;
 import me.connan.springbootdeveloper.repository.BlogRepository;
 
 @SpringBootTest
@@ -134,5 +135,35 @@ class BlogApiControllerTest {
 		// then
 		result.andExpect(status().isOk());
 		assertThat(blogRepository.findAll()).isEmpty();
+	}
+
+	@DisplayName("updateArticle: 블로그 글 수정에 성공한다.")
+	@Test
+	void updateArticle() throws Exception {
+		// given
+		final String url = "/api/articles/{id}";
+		final String title = "title";
+		final String content = "content";
+
+		Article beforeArticle = blogRepository.save(Article.builder()
+			.title(title)
+			.content(content)
+			.build());
+
+		final String newTitle = "newTitle";
+		final String newContent = "newContent";
+
+		UpdateArticleRequest request = new UpdateArticleRequest(newTitle, newContent);
+
+		// when
+		ResultActions result = mockMvc.perform(put(url, beforeArticle.getId()).contentType(MediaType.APPLICATION_JSON_VALUE)
+			.content(objectMapper.writeValueAsString(request)));
+		Article article = blogRepository.findById(beforeArticle.getId())
+			.orElseThrow();
+
+		// then
+		result.andExpect(status().isOk());
+		assertThat(article.getTitle()).isEqualTo(newTitle);
+		assertThat(article.getContent()).isEqualTo(newContent);
 	}
 }
