@@ -93,4 +93,26 @@ class BlogApiControllerTest {
 			.andExpect(jsonPath("$[0].title").value(title))
 			.andExpect(jsonPath("$[0].content").value(content));
 	}
+
+	@DisplayName("findArticle: 블로그 글 조회에 성공한다.")
+	@Test
+	void findArticle() throws Exception {
+		// given
+		final String url = "/api/articles/{id}";
+		final String title = "title";
+		final String content = "content";
+
+		Article savedArticle = blogRepository.save(Article.builder()
+			.title(title)
+			.content(content)
+			.build());
+
+		// when
+		ResultActions result = mockMvc.perform(get(url, savedArticle.getId()));
+
+		// then
+		result.andExpect(status().isOk())
+			.andExpect(jsonPath("$.title").value(title))
+			.andExpect(jsonPath("$.content").value(content));
+	}
 }
