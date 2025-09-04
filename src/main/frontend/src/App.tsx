@@ -1,40 +1,28 @@
-import React from 'react';
-import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import React, {useState} from 'react';
+import {BrowserRouter as Router, Route, Routes, useNavigate} from 'react-router-dom';
 import './App.css';
 import BlogList from "./BlogLlist";
 import BlogArticle from "./BlogArticle";
 import NewArticle from "./NewArticle";
+import Login from "./Login";
+import Signup from "./Signup";
 
 function App() {
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
     return (
         <Router>
             <div className="App">
-                {/* 네비게이션 바 */}
-                <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-                    <div className="container">
-                        <a className="navbar-brand" href="/">My Blog</a>
-                        <div className="navbar-nav">
-                            <a className="nav-link" href="/">홈</a>
-                            <a className="nav-link" href="/articles">블로그 글</a>
-                            <a className="nav-link" href="/new-article">새 글 작성</a>
-                        </div>
-                    </div>
-                </nav>
+                <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>
 
-                {/* 라우팅 설정 */}
                 <Routes>
-                    {/* 홈 페이지 (/) */}
                     <Route path="/" element={<HomePage/>}/>
-
-                    {/* 블로그 글 목록 (/articles) */}
                     <Route path="/articles" element={<BlogList/>}/>
                     <Route path="/articles/:id" element={<BlogArticle/>}/>
-
-                    {/* 새 글 작성 및 수정 */}
                     <Route path="/new-article" element={<NewArticle/>}/>
                     <Route path="/new-article/:id" element={<NewArticle/>}/>
-
-                    {/* 404 페이지 (매치되지 않는 모든 주소) */}
+                    <Route path="/login" element={<Login onLoginSuccess={() => setIsLoggedIn(true)}/>}/>
+                    <Route path="/signup" element={<Signup onSignupSuccess={() => setIsLoggedIn(false)}/>}/>
                     <Route path="*" element={<NotFoundPage/>}/>
                 </Routes>
             </div>
@@ -42,7 +30,46 @@ function App() {
     );
 }
 
-// 홈 페이지 컴포넌트
+interface NavbarProps {
+    isLoggedIn: boolean;
+    setIsLoggedIn: (loggedIn: boolean) => void;
+}
+
+// ✅ 네비게이션 바 컴포넌트
+const Navbar: React.FC<NavbarProps> = ({isLoggedIn, setIsLoggedIn}) => {
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        // 실제 로그아웃 API 호출 필요 시 여기에
+        setIsLoggedIn(false);
+        navigate("/"); // 홈으로 이동
+    };
+
+    return (
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div className="container">
+                <a className="navbar-brand" href="/">My Blog</a>
+                <div className="navbar-nav me-auto">
+                    <a className="nav-link" href="/">홈</a>
+                    <a className="nav-link" href="/articles">블로그 글</a>
+                    <a className="nav-link" href="/new-article">새 글 작성</a>
+                </div>
+                <div className="navbar-nav ms-auto">
+                    {!isLoggedIn ? (
+                        <>
+                            <a className="nav-link" href="/login">로그인</a>
+                            <a className="nav-link" href="/src/Signup">회원가입</a>
+                        </>
+                    ) : (
+                        <button className="btn btn-outline-light" onClick={handleLogout}>로그아웃</button>
+                    )}
+                </div>
+            </div>
+        </nav>
+    );
+};
+
+// ✅ 홈 페이지
 const HomePage: React.FC = () => {
     return (
         <div className="container mt-5">
@@ -57,7 +84,7 @@ const HomePage: React.FC = () => {
     );
 };
 
-// 404 페이지 컴포넌트
+// ✅ 404 페이지
 const NotFoundPage: React.FC = () => {
     return (
         <div className="container mt-5">
