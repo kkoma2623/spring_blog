@@ -50,5 +50,13 @@ public class AuthApiController {
 		return ResponseEntity.ok()
 			.body(user.getEmail());
 	}
+
+	@PostMapping("/api/user/logout")
+	public ResponseEntity<?> logout(@AuthenticationPrincipal User user) {
+		SecurityContextHolder.getContext()
+			.setAuthentication(null);
+		return ResponseEntity.ok()
+			.build();
+	}
 }
 

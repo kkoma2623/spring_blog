@@ -63,10 +63,18 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({isLoggedIn, setIsLoggedIn}) => {
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        // 실제 로그아웃 API 호출 필요 시 여기에
-        setIsLoggedIn(false);
-        navigate("/"); // 홈으로 이동
+    const handleLogout = async () => {
+        try {
+            await fetch("http://localhost:8080/api/user/logout", {
+                method: "POST",
+                credentials: "include",
+            });
+
+            setIsLoggedIn(false);
+            navigate("/");
+        } catch (err) {
+            console.error("로그아웃 실패:", err);
+        }
     };
 
     return (
