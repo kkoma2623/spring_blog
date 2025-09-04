@@ -18,11 +18,9 @@ const Login: React.FC<{ onLoginSuccess: () => void }> = ({onLoginSuccess}) => {
         try {
             const response = await fetch('http://localhost:8080/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
+                headers: {'Content-Type': 'application/json'},
                 credentials: 'include', // 세션 쿠키 저장
-                body: formData.toString(),
+                body: JSON.stringify({username, password}),
             });
 
             if (response.ok) {

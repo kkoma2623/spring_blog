@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {BrowserRouter as Router, Route, Routes, useNavigate} from 'react-router-dom';
 import './App.css';
 import BlogList from "./BlogLlist";
@@ -9,6 +9,30 @@ import Signup from "./Signup";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    // 🔥 앱이 처음 로드될 때, 로그인 상태 확인
+    useEffect(() => {
+        const checkLogin = async () => {
+            try {
+                const res = await fetch('http://localhost:8080/api/user/me', {
+                    credentials: 'include', // 세션 쿠키 포함
+                });
+
+                if (res.ok) {
+                    setIsLoggedIn(true);
+                } else {
+                    setIsLoggedIn(false);
+                }
+            } catch (err) {
+                setIsLoggedIn(false);
+            } finally {
+                setLoading(false); // 로딩 끝났음을 표시
+            }
+        };
+
+        checkLogin();
+    }, []);
 
     return (
         <Router>
@@ -58,7 +82,7 @@ const Navbar: React.FC<NavbarProps> = ({isLoggedIn, setIsLoggedIn}) => {
                     {!isLoggedIn ? (
                         <>
                             <a className="nav-link" href="/login">로그인</a>
-                            <a className="nav-link" href="/src/Signup">회원가입</a>
+                            <a className="nav-link" href="/signup">회원가입</a>
                         </>
                     ) : (
                         <button className="btn btn-outline-light" onClick={handleLogout}>로그아웃</button>
