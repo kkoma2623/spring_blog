@@ -2,6 +2,7 @@ import React from 'react';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import './App.css';
 import BlogList from "./BlogLlist";
+import BlogArticle from "./BlogArticle";
 
 function App() {
     return (
@@ -25,6 +26,7 @@ function App() {
 
                     {/* 블로그 글 목록 (/articles) */}
                     <Route path="/articles" element={<BlogList/>}/>
+                    <Route path="/articles/:id" element={<BlogArticle/>}/>
 
                     {/* 404 페이지 (매치되지 않는 모든 주소) */}
                     <Route path="*" element={<NotFoundPage/>}/>
