@@ -24,7 +24,9 @@ const BlogList: React.FC = () => {
                 setLoading(true); // 로딩 시작
 
                 // 3. API 호출
-                const response = await fetch('http://localhost:8080/api/articles');
+                const response = await fetch('http://localhost:8080/articles', {
+                    credentials: "include"
+                });
 
                 // 응답이 실패한 경우
                 if (!response.ok) {

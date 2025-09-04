@@ -55,7 +55,9 @@ const BlogArticle: React.FC<BlogArticleProps> = ({articleId}) => {
             try {
                 setLoading(true);
 
-                const response = await fetch(`http://localhost:8080/api/articles/${id}`);
+                const response = await fetch(`http://localhost:8080/articles/${id}`, {
+                    credentials: "include"
+                });
 
                 if (!response.ok) {
                     throw new Error(`API 호출 실패: ${response.status}`);
@@ -94,7 +96,7 @@ const BlogArticle: React.FC<BlogArticleProps> = ({articleId}) => {
         if (!confirmDelete) return;
 
         try {
-            const response = await fetch(`http://localhost:8080/api/articles/${article.id}`, {
+            const response = await fetch(`http://localhost:8080/articles/${article.id}`, {
                 method: 'DELETE'
             });
 

@@ -2,11 +2,14 @@ package me.connan.springbootdeveloper.config;
 
 import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.*;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -15,6 +18,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import lombok.RequiredArgsConstructor;
 import me.connan.springbootdeveloper.service.UserDetailService;
@@ -22,7 +30,7 @@ import me.connan.springbootdeveloper.service.UserDetailService;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class WebSecurityConfig {
+public class WebSecurityConfig implements WebMvcConfigurer {
 
 	private final UserDetailsService userService;
 
@@ -39,13 +47,15 @@ public class WebSecurityConfig {
 	// 특정 HTTP 요청에 대한 웹 기반 보안 구성
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		return http.authorizeHttpRequests(
+		return http.cors(Customizer.withDefaults())
+			.authorizeHttpRequests(
 				auth -> auth.requestMatchers(
 						// 경로에 대한 엑세스 설정
-						new AntPathRequestMatcher("/login"), new AntPathRequestMatcher("/signup"), new AntPathRequestMatcher("/user"))
+						new AntPathRequestMatcher("/login"), new AntPathRequestMatcher("/signup"), new AntPathRequestMatcher("/user"),
+						new AntPathRequestMatcher("/articles"))
 					.permitAll() // 여기 위 세 경로로 요청이 오면 인증/인가 없이도 접근할 수 있게 함
-					.anyRequest() // 위에서 설정한 url 이외의 요청에 대해서 설정
-					.authenticated() // 별도의 인가는 빌요하지 않지만 인증이 성공된 상태여야 접근할 수 있음
+				// .anyRequest() // 위에서 설정한 url 이외의 요청에 대해서 설정
+				// .authenticated() // 별도의 인가는 빌요하지 않지만 인증이 성공된 상태여야 접근할 수 있음
 			)
 			.formLogin(formLogin -> formLogin // 폼 기반 로그인 설정
 				.loginPage("/login") // 로그인 페이지 경로를 설정
@@ -73,4 +83,26 @@ public class WebSecurityConfig {
 	public BCryptPasswordEncoder bCryptPasswordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
+
+	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+		registry.addMapping("/**") // 모든 경로 허용
+			.allowedOrigins("http://localhost:3000") // 프론트 주소인데 다 풀면 cors 위반
+			.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+			.allowCredentials(true); // 쿠키 등 자격 증명 허용 시 필요
+	}
+
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.setAllowedOrigins(List.of("http://localhost:3000")); //  프론트 주소
+		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		config.setAllowedHeaders(List.of("*"));
+		config.setAllowCredentials(true); // 쿠키/세션 인증 허용
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+		return source;
+	}
+
 }

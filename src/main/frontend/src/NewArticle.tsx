@@ -54,13 +54,14 @@ const NewArticle: React.FC = () => {
         if (formData.id) {
             // 수정 모드
             try {
-                const response = await fetch(`http://localhost:8080/api/articles/${formData.id}`, {
+                const response = await fetch(`http://localhost:8080/articles/${formData.id}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         title: formData.title,
                         content: formData.content
-                    })
+                    }),
+                    credentials: "include"
                 });
 
                 if (response.ok) {
@@ -76,13 +77,14 @@ const NewArticle: React.FC = () => {
         } else {
             // 등록 모드
             try {
-                const response = await fetch('http://localhost:8080/api/articles', {
+                const response = await fetch('http://localhost:8080/articles', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         title: formData.title,
                         content: formData.content
-                    })
+                    }),
+                    credentials: "include"
                 });
 
                 if (response.ok) {
