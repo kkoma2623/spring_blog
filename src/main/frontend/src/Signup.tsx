@@ -20,7 +20,7 @@ const Signup: React.FC<SignupProps> = ({onSignupSuccess}) => {
         }
 
         try {
-            const response = await fetch('http://localhost:8080/signup', {
+            const response = await fetch('http://localhost:8080/user', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

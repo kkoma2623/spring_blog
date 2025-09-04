@@ -22,7 +22,7 @@ function App() {
                     <Route path="/new-article" element={<NewArticle/>}/>
                     <Route path="/new-article/:id" element={<NewArticle/>}/>
                     <Route path="/login" element={<Login onLoginSuccess={() => setIsLoggedIn(true)}/>}/>
-                    <Route path="/signup" element={<Signup onSignupSuccess={() => setIsLoggedIn(false)}/>}/>
+                    <Route path="/user" element={<Signup onSignupSuccess={() => setIsLoggedIn(false)}/>}/>
                     <Route path="*" element={<NotFoundPage/>}/>
                 </Routes>
             </div>
