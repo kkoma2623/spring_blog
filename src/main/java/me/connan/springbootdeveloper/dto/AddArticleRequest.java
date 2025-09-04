@@ -18,4 +18,12 @@ public class AddArticleRequest {
 			.content(content)
 			.build();
 	}
+
+	public Article toEntity(String author) {
+		return Article.builder()
+			.title(title)
+			.content(content)
+			.author(author)
+			.build();
+	}
 }

@@ -1,5 +1,6 @@
 package me.connan.springbootdeveloper.controller;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -28,9 +29,9 @@ public class BlogApiController {
 	private final BlogService blogService;
 
 	@PostMapping("/api/articles")
-	public ResponseEntity<Article> addArticle(@RequestBody AddArticleRequest request) {
+	public ResponseEntity<Article> addArticle(@RequestBody AddArticleRequest request, Principal principal) {
 
-		Article savedArticle = blogService.save(request);
+		Article savedArticle = blogService.save(request, principal.getName());
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(savedArticle);
