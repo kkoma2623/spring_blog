@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import {Link} from "react-router-dom";
 
 // 블로그 글 타입 정의
 interface Article {
@@ -130,9 +131,7 @@ const BlogList: React.FC = () => {
                                     <div className="card-body">
                                         <h5 className="card-title">{article.title}</h5>
                                         <p className="card-text">{article.content}</p>
-                                        <a href={`/article/${article.id}`} className="btn btn-primary">
-                                            보러가기
-                                        </a>
+                                        <Link className="btn btn-primary" to={`/articles/${article.id}`}>보러가기</Link>
                                     </div>
                                 </div>
                             </div>
