@@ -59,6 +59,10 @@ const BlogArticle: React.FC<BlogArticleProps> = ({articleId}) => {
                     credentials: "include"
                 });
 
+                if (response.status === 401) {
+                    navigate("/login");
+                }
+
                 if (!response.ok) {
                     throw new Error(`API 호출 실패: ${response.status}`);
                 }

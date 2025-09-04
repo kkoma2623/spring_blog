@@ -28,6 +28,9 @@ const BlogList: React.FC = () => {
                     credentials: "include"
                 });
 
+                if (response.status === 401) {
+                    navigate("/login");
+                }
                 // 응답이 실패한 경우
                 if (!response.ok) {
                     throw new Error(`API 호출 실패: ${response.status}`);
