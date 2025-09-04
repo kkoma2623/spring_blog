@@ -16,6 +16,24 @@ spring:
   h2:
     console:
       enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          naver: # 제공자 이름 (임의로 지정 가능)
+            provider: naver
+            client-id: local_note
+            client-secret: local_note
+            scope:
+              - name
+              - email
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:3000/articles
+        provider:
+          naver:
+            issuer-uri: https://nid.naver.com  # Naver의 Issuer URI
+
 
 jwt:
   issuer: ajufresh@gmail.com
