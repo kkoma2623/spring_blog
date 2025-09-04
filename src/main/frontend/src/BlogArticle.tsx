@@ -7,6 +7,7 @@ interface Article {
     title: string;
     content: string;
     createdAt: string;
+    author: string;
 }
 
 interface BlogArticleProps {
@@ -202,7 +203,7 @@ const BlogArticle: React.FC<BlogArticleProps> = ({articleId}) => {
                             <header className="mb-4">
                                 <h1 className="fw-bolder mb-1">{article.title}</h1>
                                 <div className="text-muted fst-italic mb-2">
-                                    Posted on {formatDate(article.createdAt)}
+                                    Posted on {formatDate(article.createdAt)} By {article.author}
                                 </div>
                             </header>
 
