@@ -52,9 +52,8 @@ public class AuthApiController {
 	}
 
 	@PostMapping("/api/user/logout")
-	public ResponseEntity<?> logout(@AuthenticationPrincipal User user) {
-		SecurityContextHolder.getContext()
-			.setAuthentication(null);
+	public ResponseEntity<?> logout(HttpSession session) {
+		session.invalidate();
 		return ResponseEntity.ok()
 			.build();
 	}
