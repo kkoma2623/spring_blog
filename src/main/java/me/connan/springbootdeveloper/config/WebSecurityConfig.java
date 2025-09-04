@@ -54,8 +54,8 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 						new AntPathRequestMatcher("/login"), new AntPathRequestMatcher("/signup"), new AntPathRequestMatcher("/user"),
 						new AntPathRequestMatcher("/articles"))
 					.permitAll() // 여기 위 세 경로로 요청이 오면 인증/인가 없이도 접근할 수 있게 함
-				// .anyRequest() // 위에서 설정한 url 이외의 요청에 대해서 설정
-				// .authenticated() // 별도의 인가는 빌요하지 않지만 인증이 성공된 상태여야 접근할 수 있음
+					.anyRequest() // 위에서 설정한 url 이외의 요청에 대해서 설정
+					.authenticated() // 별도의 인가는 빌요하지 않지만 인증이 성공된 상태여야 접근할 수 있음
 			)
 			.formLogin(formLogin -> formLogin // 폼 기반 로그인 설정
 				.loginPage("/login") // 로그인 페이지 경로를 설정
