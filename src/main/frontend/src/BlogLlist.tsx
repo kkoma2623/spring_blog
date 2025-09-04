@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 // 블로그 글 타입 정의
 interface Article {
@@ -13,6 +13,8 @@ const BlogList: React.FC = () => {
     const [articles, setArticles] = useState<Article[]>([]); // 빈 배열로 시작
     const [loading, setLoading] = useState<boolean>(true);   // 로딩 상태
     const [error, setError] = useState<string | null>(null); // 에러 상태
+
+    const navigate = useNavigate();
 
     // 2. 컴포넌트가 처음 렌더링될 때 API 호출
     useEffect(() => {
@@ -110,6 +112,9 @@ const BlogList: React.FC = () => {
             </div>
 
             {/* 블로그 글 목록 */}
+            <button type="button" id="create-btn" className="btn btn-secondary btn-sm mb-3"
+                    onClick={() => navigate(`/new-article`)}>글 등록
+            </button>
             <div className="container">
                 {/* 글이 없는 경우 */}
                 {articles.length === 0 ? (
