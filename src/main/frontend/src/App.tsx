@@ -3,18 +3,20 @@ import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import './App.css';
 import BlogList from "./BlogLlist";
 import BlogArticle from "./BlogArticle";
+import NewArticle from "./NewArticle";
 
 function App() {
     return (
         <Router>
             <div className="App">
-                {/* 네비게이션 바 (선택사항) */}
+                {/* 네비게이션 바 */}
                 <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
                     <div className="container">
                         <a className="navbar-brand" href="/">My Blog</a>
                         <div className="navbar-nav">
                             <a className="nav-link" href="/">홈</a>
                             <a className="nav-link" href="/articles">블로그 글</a>
+                            <a className="nav-link" href="/new-article">새 글 작성</a>
                         </div>
                     </div>
                 </nav>
@@ -27,6 +29,10 @@ function App() {
                     {/* 블로그 글 목록 (/articles) */}
                     <Route path="/articles" element={<BlogList/>}/>
                     <Route path="/articles/:id" element={<BlogArticle/>}/>
+
+                    {/* 새 글 작성 및 수정 */}
+                    <Route path="/new-article" element={<NewArticle/>}/>
+                    <Route path="/new-article/:id" element={<NewArticle/>}/>
 
                     {/* 404 페이지 (매치되지 않는 모든 주소) */}
                     <Route path="*" element={<NotFoundPage/>}/>

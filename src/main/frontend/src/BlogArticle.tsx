@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom'
 
 // 블로그 글 타입 정의
 interface Article {
@@ -21,6 +22,8 @@ const BlogArticle: React.FC<BlogArticleProps> = ({articleId}) => {
     };
 
     const id = articleId || getArticleIdFromUrl();
+
+    const navigate = useNavigate();
 
     // State 정의
     const [article, setArticle] = useState<Article | null>(null);
@@ -77,7 +80,9 @@ const BlogArticle: React.FC<BlogArticleProps> = ({articleId}) => {
     // 수정 버튼 클릭 핸들러
     const handleEdit = () => {
         if (article) {
-            window.location.href = `/articles/${article.id}/edit`;
+            navigate(`/new-article/${article.id}`, {
+                state: {article}  // article 데이터를 state로 전달
+            });
         }
     };
 
@@ -98,7 +103,7 @@ const BlogArticle: React.FC<BlogArticleProps> = ({articleId}) => {
             }
 
             alert('글이 삭제되었습니다.');
-            window.location.href = '/articles';
+            navigate('/articles'); // navigate 사용으로 변경
 
         } catch (err) {
             console.error('삭제 에러:', err);
@@ -139,9 +144,12 @@ const BlogArticle: React.FC<BlogArticleProps> = ({articleId}) => {
                         >
                             다시 시도
                         </button>
-                        <a href="/articles" className="btn btn-outline-primary">
+                        <button
+                            className="btn btn-outline-primary"
+                            onClick={() => navigate('/articles')}
+                        >
                             글 목록으로 돌아가기
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -161,9 +169,12 @@ const BlogArticle: React.FC<BlogArticleProps> = ({articleId}) => {
                     <div className="alert alert-warning text-center">
                         <h4>글을 찾을 수 없습니다.</h4>
                         <p>요청하신 글이 존재하지 않거나 삭제되었습니다.</p>
-                        <a href="/articles" className="btn btn-primary">
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => navigate('/articles')}
+                        >
                             글 목록으로 돌아가기
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -210,9 +221,12 @@ const BlogArticle: React.FC<BlogArticleProps> = ({articleId}) => {
                                 >
                                     삭제
                                 </button>
-                                <a href="/articles" className="btn btn-outline-primary btn-sm">
+                                <button
+                                    className="btn btn-outline-primary btn-sm"
+                                    onClick={() => navigate('/articles')}
+                                >
                                     목록으로 돌아가기
-                                </a>
+                                </button>
                             </div>
                         </article>
                     </div>
