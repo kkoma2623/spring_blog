@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,6 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import me.connan.springbootdeveloper.service.UserDetailService;
 
@@ -48,24 +50,27 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		return http.cors(Customizer.withDefaults())
+			.csrf(AbstractHttpConfigurer::disable) // CSRF 설정을 비활성화 하겠다. CSRF 공격 방지를 위해 해야하지만 실습을 위해 비활성화 함
 			.authorizeHttpRequests(
 				auth -> auth.requestMatchers(
 						// 경로에 대한 엑세스 설정
-						new AntPathRequestMatcher("/login"), new AntPathRequestMatcher("/signup"), new AntPathRequestMatcher("/user"),
-						new AntPathRequestMatcher("/articles"))
+						new AntPathRequestMatcher("/login"), new AntPathRequestMatcher("/signup"), new AntPathRequestMatcher("/user"))
 					.permitAll() // 여기 위 세 경로로 요청이 오면 인증/인가 없이도 접근할 수 있게 함
 					.anyRequest() // 위에서 설정한 url 이외의 요청에 대해서 설정
 					.authenticated() // 별도의 인가는 빌요하지 않지만 인증이 성공된 상태여야 접근할 수 있음
 			)
-			.formLogin(formLogin -> formLogin // 폼 기반 로그인 설정
-				.loginPage("/login") // 로그인 페이지 경로를 설정
-				.defaultSuccessUrl("/articles") // 로그인 성공하면 이동할 경로
-			)
-			.logout(logout -> logout // 로그아웃 설정
-				.logoutSuccessUrl("/login") // 로그아웃 완료되면 이동할 경로
-				.invalidateHttpSession(true) // 로그아웃 이후에 세션을 전체 삭제할지 여부
-			)
-			.csrf(AbstractHttpConfigurer::disable) // CSRF 설정을 비활성화 하겠다. CSRF 공격 방지를 위해 해야하지만 실습을 위해 비활성화 함
+			// .formLogin(formLogin -> formLogin // 폼 기반 로그인 설정
+			// 	.loginPage("/login") // 로그인 페이지 경로를 설정
+			// 	.defaultSuccessUrl("/articles") // 로그인 성공하면 이동할 경로
+			// )
+			// .logout(logout -> logout // 로그아웃 설정
+			// 	.logoutSuccessUrl("/login") // 로그아웃 완료되면 이동할 경로
+			// 	.invalidateHttpSession(true) // 로그아웃 이후에 세션을 전체 삭제할지 여부
+			// )
+			.exceptionHandling(e -> e.authenticationEntryPoint(((request, response, authException) -> {
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+				})
+			)).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
 			.build();
 	}
 
