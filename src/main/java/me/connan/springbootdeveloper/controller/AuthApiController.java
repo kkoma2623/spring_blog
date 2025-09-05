@@ -1,12 +1,13 @@
 package me.connan.springbootdeveloper.controller;
 
+import java.security.Principal;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import me.connan.springbootdeveloper.domain.User;
 import me.connan.springbootdeveloper.dto.LoginRequest;
 
 @RestController
@@ -42,13 +42,10 @@ public class AuthApiController {
 	}
 
 	@GetMapping("/api/user/me")
-	public ResponseEntity<?> currentUser(@AuthenticationPrincipal User user) {
-		if (user == null) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-				.body("로그인 안됨");
-		}
-		return ResponseEntity.ok()
-			.body(user.getEmail());
+	public ResponseEntity<?> currentUser(Principal principal) {
+		if (principal == null)
+			return ResponseEntity.status(401).body("로그인 안됨");
+		return ResponseEntity.ok(principal.getName());
 	}
 
 	@PostMapping("/api/user/logout")
