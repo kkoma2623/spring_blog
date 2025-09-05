@@ -2,6 +2,8 @@ package me.connan.springbootdeveloper.config.oauth;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -26,7 +28,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
 	public static final Duration REFRESH_TOKEN_DURATION = Duration.ofDays(14);
 	public static final Duration ACCESS_TOKEN_DURATION = Duration.ofDays(1);
-	public static final String REDIRECT_PATH = "/articles";
+	public static final String REDIRECT_PATH = "http://localhost:3000/naver/callback";
 
 	private final TokenProvider tokenProvider;
 	private final RefreshTokenRepository refreshTokenRepository;
@@ -37,7 +39,15 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 		Authentication authentication) throws IOException {
 		OAuth2User oAuth2User = (OAuth2User)authentication.getPrincipal();
-		User user = userService.findByEmail((String)oAuth2User.getAttributes().get("email"));
+
+		// 네이버는 response 객체 안에 email이 있음
+		String email = null;
+		Map<String, Object> attributes = oAuth2User.getAttributes();
+		Map<String, Object> naverResponse = (Map<String, Object>)attributes.get("response");
+
+		email = (String)Objects.requireNonNullElse(naverResponse, attributes).get("email");
+
+		User user = userService.findByEmail(email);
 
 		String refreshToken = tokenProvider.generateToken(user, REFRESH_TOKEN_DURATION);
 		saveRefreshToken(user.getId(), refreshToken);

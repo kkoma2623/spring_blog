@@ -34,8 +34,8 @@ public class WebOAuthSecurityConfig {
 
 	private final OAuth2UserCustomService oAuth2UserCustomService;
 	private final TokenProvider tokenProvider;
-	private final OAuth2SuccessHandler oAuth2SuccessHandler; // ✅ 자동 주입됨
-	private final OAuth2AuthorizationRequestBasedOnCookieRepository authRequestRepository; // ✅ OK
+	private final OAuth2SuccessHandler oAuth2SuccessHandler; // 자동 주입됨
+	private final OAuth2AuthorizationRequestBasedOnCookieRepository authRequestRepository; // OK
 
 	@Bean
 	public WebSecurityCustomizer configure() { // 스프링 시큐리티 기능 비활성화
@@ -92,7 +92,9 @@ public class WebOAuthSecurityConfig {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(List.of("http://localhost:3000"));  // 리액트 주소 넣기
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		configuration.setAllowedHeaders(List.of("*"));
+		// 명시적으로 Authorization 등 필요한 헤더들을 허용
+		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+		configuration.setExposedHeaders(List.of("Authorization"));
 		configuration.setAllowCredentials(true); // 쿠키, 인증정보 허용
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

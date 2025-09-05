@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Link, useNavigate} from "react-router-dom";
+import {Link, useNavigate, useLocation} from "react-router-dom";
 
 // 블로그 글 타입 정의
 interface Article {
@@ -15,6 +15,21 @@ const BlogList: React.FC = () => {
     const [error, setError] = useState<string | null>(null); // 에러 상태
 
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // OAuth 로그인 후 토큰 처리
+    useEffect(() => {
+        const urlParams = new URLSearchParams(location.search);
+        const token = urlParams.get('token');
+        
+        if (token) {
+            // 토큰이 있으면 localStorage에 저장
+            localStorage.setItem('accessToken', token);
+            // URL에서 토큰 제거
+            window.history.replaceState({}, document.title, "/articles");
+            // 상위 컴포넌트에서 처리하므로 새로고침 제거
+        }
+    }, [location]);
 
     // 2. 컴포넌트가 처음 렌더링될 때 API 호출
     useEffect(() => {

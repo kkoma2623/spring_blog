@@ -23,7 +23,6 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 		OAuth2User user = super.loadUser(userRequest);
 		saveOrUpdate(user);
-
 		return user;
 	}
 
@@ -31,8 +30,20 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
 	private User saveOrUpdate(OAuth2User oAuth2User) {
 		Map<String, Object> attributes = oAuth2User.getAttributes();
 
-		String email = (String)attributes.get("email");
-		String name = (String)attributes.get("name");
+		// 네이버는 response 객체 안에 실제 데이터가 있음
+		Map<String, Object> response = (Map<String, Object>)attributes.get("response");
+
+		final String email;
+		final String name;
+
+		if (response != null) {
+			email = (String)response.get("email");
+			name = (String)response.get("name");
+		} else {
+			// 다른 OAuth 제공자 (구글 등)
+			email = (String)attributes.get("email");
+			name = (String)attributes.get("name");
+		}
 
 		User user = userRepository.findByEmail(email)
 			.map(entity -> entity.update(name))

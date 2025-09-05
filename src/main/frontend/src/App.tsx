@@ -1,56 +1,105 @@
 import React, {useEffect, useState} from 'react';
-import {BrowserRouter as Router, Route, Routes, useNavigate} from 'react-router-dom';
+import {Route, Routes, useLocation, useNavigate} from 'react-router-dom';
 import './App.css';
 import BlogList from "./BlogLlist";
 import BlogArticle from "./BlogArticle";
 import NewArticle from "./NewArticle";
-import Login from "./Login";
 import Signup from "./Signup";
+import LoginPage from "./LoginPage";
+import NaverCallback from "./NaverCallback";
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [loading, setLoading] = useState(true);
+    const location = useLocation();
+
+    // move checkLogin to component scope so other effects/listeners can call it
+    const checkLogin = async () => {
+        try {
+            const storedToken = localStorage.getItem('accessToken');
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+            };
+
+            // optimistic UI: if token exists, assume logged in and update navbar immediately
+            if (storedToken) {
+                headers['Authorization'] = `Bearer ${storedToken}`;
+            }
+
+            const res = await fetch('http://localhost:8080/api/user/me', {
+                credentials: 'include', // 쿠키 포함
+                headers: headers
+            });
+
+            if (res.ok) {
+                setIsLoggedIn(true);
+            } else {
+                setIsLoggedIn(false);
+            }
+        } catch (err) {
+            setIsLoggedIn(false);
+        } finally {
+            setLoading(false); // 로딩 끝났음을 표시
+        }
+    };
 
     // 🔥 앱이 처음 로드될 때, 로그인 상태 확인
     useEffect(() => {
-        const checkLogin = async () => {
-            try {
-                const res = await fetch('http://localhost:8080/api/user/me', {
-                    credentials: 'include', // 세션 쿠키 포함
-                });
+        // URL에서 토큰 확인 (OAuth 로그인 후)
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        // hash에서 access_token 지원 (예: OAuth implicit flow)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const tokenFromHash = hashParams.get('access_token') || hashParams.get('token');
 
-                if (res.ok) {
-                    setIsLoggedIn(true);
-                } else {
-                    setIsLoggedIn(false);
-                }
-            } catch (err) {
-                setIsLoggedIn(false);
-            } finally {
-                setLoading(false); // 로딩 끝났음을 표시
+
+        if (token) {
+            localStorage.setItem('accessToken', token);
+            // URL에서 토큰 제거
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        if (!token && tokenFromHash) {
+            localStorage.setItem('accessToken', tokenFromHash);
+            // hash 제거
+            try {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (e) {
+                // ignore
             }
-        };
+        }
 
         checkLogin();
+    }, [location]);
+
+    // listen for auth changes (e.g. NaverCallback saved token)
+    useEffect(() => {
+        const handler = () => {
+            // re-check login state when NaverCallback dispatches event
+            checkLogin();
+        };
+
+        window.addEventListener('authChange', handler);
+        return () => window.removeEventListener('authChange', handler);
     }, []);
 
     return (
-        <Router>
-            <div className="App">
-                <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>
+        <div className="App">
+            <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>
 
-                <Routes>
-                    <Route path="/" element={<HomePage/>}/>
-                    <Route path="/articles" element={<BlogList/>}/>
-                    <Route path="/articles/:id" element={<BlogArticle/>}/>
-                    <Route path="/new-article" element={<NewArticle/>}/>
-                    <Route path="/new-article/:id" element={<NewArticle/>}/>
-                    <Route path="/login" element={<Login onLoginSuccess={() => setIsLoggedIn(true)}/>}/>
-                    <Route path="/signup" element={<Signup onSignupSuccess={() => setIsLoggedIn(false)}/>}/>
-                    <Route path="*" element={<NotFoundPage/>}/>
-                </Routes>
-            </div>
-        </Router>
+            <Routes>
+                <Route path="/" element={<HomePage/>}/>
+                <Route path="/articles" element={<BlogList/>}/>
+                <Route path="/articles/:id" element={<BlogArticle/>}/>
+                <Route path="/new-article" element={<NewArticle/>}/>
+                <Route path="/new-article/:id" element={<NewArticle/>}/>
+                {/*<Route path="/login" element={<Login onLoginSuccess={() => setIsLoggedIn(true)}/>}/>*/}
+                <Route path="/login" element={<LoginPage onLoginSuccess={() => setIsLoggedIn(true)}/>}/>
+                <Route path="/naver/callback" element={<NaverCallback/>}/>
+                <Route path="/signup" element={<Signup onSignupSuccess={() => setIsLoggedIn(false)}/>}/>
+                <Route path="*" element={<NotFoundPage/>}/>
+            </Routes>
+        </div>
     );
 }
 
@@ -59,7 +108,6 @@ interface NavbarProps {
     setIsLoggedIn: (loggedIn: boolean) => void;
 }
 
-// ✅ 네비게이션 바 컴포넌트
 const Navbar: React.FC<NavbarProps> = ({isLoggedIn, setIsLoggedIn}) => {
     const navigate = useNavigate();
 
@@ -70,10 +118,11 @@ const Navbar: React.FC<NavbarProps> = ({isLoggedIn, setIsLoggedIn}) => {
                 credentials: "include",
             });
 
+            localStorage.removeItem('accessToken');
             setIsLoggedIn(false);
             navigate("/");
         } catch (err) {
-            console.error("로그아웃 실패:", err);
+            console.error("Logout failed", err);
         }
     };
 
