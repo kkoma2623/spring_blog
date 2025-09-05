@@ -2,6 +2,7 @@ package me.connan.springbootdeveloper.service;
 
 import java.util.List;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,13 @@ import me.connan.springbootdeveloper.repository.BlogRepository;
 public class BlogService {
 
 	private final BlogRepository blogRepository;
+
+	private static void authorizeArticleAuthor(Article article) {
+		String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+		if (!article.getAuthor().equals(userName)) {
+			throw new IllegalArgumentException("not authorized");
+		}
+	}
 
 	public Article save(AddArticleRequest request) {
 		return blogRepository.save(request.toEntity());
@@ -34,16 +42,23 @@ public class BlogService {
 			.orElseThrow(() -> new IllegalArgumentException("not found: " + id));
 	}
 
-	public void delete(Long id) {
-		blogRepository.deleteById(id);
+	public void delete(long id) {
+		Article article = blogRepository.findById(id)
+			.orElseThrow(() -> new IllegalArgumentException("not found : " + id));
+
+		authorizeArticleAuthor(article);
+		blogRepository.delete(article);
 	}
 
 	@Transactional
-	public Article update(Long id, UpdateArticleRequest request) {
-		Article article = this.findById(id);
+	public Article update(long id, UpdateArticleRequest request) {
+		Article article = blogRepository.findById(id)
+			.orElseThrow(() -> new IllegalArgumentException("not found : " + id));
 
+		authorizeArticleAuthor(article);
 		article.update(request.getTitle(), request.getContent());
 
 		return article;
 	}
+
 }

@@ -1,9 +1,11 @@
 package me.connan.springbootdeveloper.controller;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,10 +47,10 @@ public class BlogViewController {
 	}
 
 	@PostMapping("/articles")
-	public ResponseEntity<ArticleViewResponse> createArticle(@RequestBody AddArticleRequest request) {
-		Article savedArticle = blogService.save(request);
-		return ResponseEntity.status(HttpStatus.CREATED)
-			.body(new ArticleViewResponse(savedArticle));
+	public ResponseEntity<ArticleViewResponse> createArticle(@RequestBody AddArticleRequest request,
+		Principal principal) {
+		Article saved = blogService.save(request, principal.getName());
+		return ResponseEntity.status(HttpStatus.CREATED).body(new ArticleViewResponse(saved));
 	}
 
 	@PutMapping("/articles/{id}")
@@ -57,4 +59,11 @@ public class BlogViewController {
 		Article updatedArticle = blogService.update(id, request);
 		return ResponseEntity.ok(new ArticleViewResponse(updatedArticle));
 	}
+	
+	@DeleteMapping("/articles/{id}")
+	public ResponseEntity<Void> deleteArticleView(@PathVariable Long id) {
+		blogService.delete(id);
+		return ResponseEntity.ok().build();
+	}
+
 }
